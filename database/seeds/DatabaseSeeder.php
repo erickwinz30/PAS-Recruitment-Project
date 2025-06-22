@@ -25,6 +25,15 @@ class DatabaseSeeder extends Seeder
       'password' => bcrypt('admin123'),
     ]);
 
+    User::create([
+      'name' => 'User',
+      'email' => 'user@gmail.com',
+      'phone_number' => '+6285155431948',
+      'is_admin' => false,
+      'is_deleted' => false,
+      'password' => bcrypt('user123'),
+    ]);
+
     Stock::create([
       'name' => 'Mie Sedap Goreng',
       'amount' => 100,
@@ -33,6 +42,21 @@ class DatabaseSeeder extends Seeder
     Stock::create([
       'name' => 'Mie Sedap Kari Ayam',
       'amount' => 200,
+    ]);
+
+    Stock::create([
+      'name' => 'Mie Sedap Kaldu Ayam',
+      'amount' => 150,
+    ]);
+
+    Stock::create([
+      'name' => 'Mie Sedap Goreng Jumbo',
+      'amount' => 150,
+    ]);
+
+    Stock::create([
+      'name' => 'Mie Sedap Korean Ramyeon',
+      'amount' => 150,
     ]);
   }
 }
