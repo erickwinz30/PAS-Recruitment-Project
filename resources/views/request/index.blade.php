@@ -2,35 +2,14 @@
 
 @section('container')
   <div class="pagetitle">
-    <h1>Stock</h1>
+    <h1>Approvals</h1>
     <nav>
       <ol class="breadcrumb">
         {{-- <li class="breadcrumb-item"><a href="/dashboard/admin">Admin</a></li> --}}
-        <li class="breadcrumb-item active"><a href="/">Stock</a></li>
+        <li class="breadcrumb-item active"><a href="/">Request Approvals</a></li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
-
-  {{-- @if (session()->has('success'))
-    <x-alert-success :message="session('success')" />
-  @endif
-  <div class="row justify-content-center">
-    <div class="alert alert-success alert-dismissible fade show col-lg-12" role="alert">
-      {{ $message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  </div> --}}
-
-  {{-- @if (session()->has('error'))
-    <x-alert-error :message="session('error')" />
-  <div class="row justify-content-center">
-    <div class="alert alert-danger alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-      {{ session('error') }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  </div>
-  @endif --}}
-
 
   <section class="section">
     <div class="row justify-content-center">
@@ -39,11 +18,7 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="card-title">Stock</h5>
-              </div>
-              <div>
-                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                  data-bs-target="#addNewStockModal">Baru</button>
+                <h5 class="card-title">Daftar Permintaan Persetujuan</h5>
               </div>
             </div>
 
@@ -53,50 +28,76 @@
                 <thead>
                   <tr>
                     <th>No</th>
-                    <th>Nama</th>
+                    <th>User Request</th>
+                    <th>Nama Stock</th>
                     <th>Jumlah Stock</th>
-                    <th>Terakhir Masuk</th>
-                    <th>Aksi</th>
+                    <th>Masuk/Keluar</th>
+                    <th>Tanggal Request</th>
+                    <th>Status Approval</th>
+                    @if (auth()->user()->is_admin)
+                      <th>Aksi</th>
+                    @endif
                   </tr>
                 </thead>
                 <tbody>
-                  @if ($stocks->isNotEmpty())
-                    @foreach ($stocks as $stock)
+                  @if ($requestApprovals->isNotEmpty())
+                    @foreach ($requestApprovals as $request)
                       <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $stock->name }}</td>
-                        <td>{{ $stock->amount }}</td>
+                        <td>{{ $request->user->name }} @if (auth()->user()->id === $request->user->id)
+                            (Anda)
+                          @endif
+                        </td>
+                        <td>{{ $request->stock->name }}</td>
+                        <td>{{ $request->amount }}</td>
+                        <td>
+                          @if ($request->is_entry)
+                            Barang masuk
+                          @else
+                            Barang keluar
+                          @endif
+                        </td>
                         <td class="text-center align-middle" style="padding: 0;">
                           <span
                             style="color:#219653; background-color: #e8f4ed; border-radius: 10px; padding: 3px 5px; display: inline-block; box-sizing: border-box">
-                            {{ \Carbon\Carbon::parse($stock->updated_at)->format('d-m-Y H:i:s') }}
+                            {{ \Carbon\Carbon::parse($request->created_at)->format('d-m-Y H:i:s') }}
                           </span>
                         </td>
-                        <td>
-                          {{-- <a href="/transaksi/{{ $transaksi->id }}" class="btn btn-info"><i class="bi bi-eye"></i></a> --}}
-                          <button type="button" class="btn btn-warning" id="btn-request-approval"
-                            data-stock-id="{{ $stock->id }}" data-bs-toggle="modal"
-                            data-bs-target="#requestApprovalModal">Masuk/Keluar</button>
-                          @if (auth()->user()->is_admin)
-                            <button type="button" class="btn btn-warning" id="btn-edit"
-                              data-edit-id="{{ $stock->id }}" data-bs-toggle="modal"
-                              data-bs-target="#editStockModal"><i class="bi bi-pencil"></i></button>
-                            <form action="/stock/{{ $stock->id }}" method="POST" class="d-inline delete-form"
-                              id="deleteForm{{ $stock->id }}">
-                              @method('DELETE')
-                              @csrf
-                              <button type="button" class="btn btn-danger"
-                                onclick="deleteConfirmation('{{ $stock->id }}')">
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </form>
-                          @endif
-                        </td>
+                        @if ($request->status == 'pending')
+                          <td class="text-center align-middle">
+                            <span
+                              style="color:#f2c94c; background-color: #fdf3e0; border-radius: 10px; padding: 3px 5px; display: inline-block; box-sizing: border-box">
+                              Pending
+                            </span>
+                          </td>
+                        @elseif($request->status == 'approved')
+                          <td class="text-center align-middle">
+                            <span
+                              style="color:#27ae60; background-color: #e8f4ed; border-radius: 10px; padding: 3px 5px; display: inline-block; box-sizing: border-box">
+                              Approved
+                            </span>
+                          </td>
+                        @elseif($request->status == 'rejected')
+                          <td class="text-center align-middle">
+                            <span
+                              style="color:#eb5757; background-color: #fbe9e9; border-radius: 10px; padding: 3px 5px; display: inline-block; box-sizing: border-box">
+                              Rejected
+                            </span>
+                          </td>
+                        @endif
+                        @if (auth()->user()->is_admin)
+                          <td>
+                            @if (auth()->user()->is_admin)
+                              <button type="button" class="btn btn-success" id="btn-accept-approval">Terima</button>
+                              <button type="button" class="btn btn-danger" id="btn-reject-approval">Tolak</button>
+                            @endif
+                          </td>
+                        @endif
                       </tr>
                     @endforeach
                   @else
                     <tr>
-                      <td colspan="5" class="text-center">No transactions found for the selected date range.</td>
+                      <td colspan="7" class="text-center">No transactions found for the selected date range.</td>
                     </tr>
                   @endif
                 </tbody>
@@ -115,142 +116,21 @@
       </div>
     </div>
 
-    @if (auth()->user()->is_admin)
-      <!-- Create Modal -->
-      <div class="modal fade" id="addNewStockModal" tabindex="-1" aria-labelledby="newStockLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Tambah Barang Baru</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/stock" method="post" id="addStockForm">
-              <div class="modal-body">
-                <div class="mb-3">
-                  <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
-                    Barang Baru</label>
-                  <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}"
-                    required autofocus>
-                  @error('name')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-                <div class="mb-3">
-                  <label for="amount" class="form-label">Jumlah Barang</label>
-                  <input type="text" inputmode="numeric" class="form-control" id="amount" name="amount"
-                    value="{{ old('amount') }}" required autofocus>
-                  @error('amount')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    @endif
-
-    @if (auth()->user()->is_admin)
-      <!-- Edit Modal -->
-      <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Stock Barang</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/stock/" method="post" id="editStockForm">
-              @csrf
-              @method('PUT')
-              <div class="modal-body">
-                <input type="text" class="form-control" id="edit-id" name="id" required hidden>
-                <div class="mb-3">
-                  <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
-                    Barang</label>
-                  <input type="text" class="form-control" id="edit-name" name="name" required>
-                  @error('name')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-                <div class="mb-3">
-                  <label for="edit-amount" class="form-label @error('amount') is-invalid @enderror">Jumlah
-                    Barang</label>
-                  <input type="text" inputmode="numeric" class="form-control" id="edit-amount" name="amount"
-                    required>
-                  @error('name')
-                    <div class="invalid-feedback">
-                      {{ $message }}
-                    </div>
-                  @enderror
-                </div>
-                {{-- <div class="mb-3">
-                <h6 class="card-text fw-semibold mt-3">Masuk/Keluar</h6>
-                <div class="d-flex justify-content-evenly align-items-center">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="is_entry" id="is_admin_1" value="1" />
-                    <label class="form-check-label" for="is_admin_1">
-                      Masuk </label>
-                  </div>
-                  <div class="form-check ms-3">
-                    <input class="form-check-input" type="radio" name="is_entry" id="is_admin_2" value="0" />
-                    <label class="form-check-label" for="is_admin_2">
-                      Keluar </label>
-                  </div>
-                </div>
-              </div> --}}
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="btn-update-"
-                  onclick="editConfirmation()">Update</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    @endif
-
-
-    <!-- Request Modal -->
-    <div class="modal fade" id="requestApprovalModal" tabindex="-1" aria-labelledby="requestApprovalLabel"
-      aria-hidden="true">
+    <!-- Create Modal -->
+    {{-- <div class="modal fade" id="addNewStockModal" tabindex="-1" aria-labelledby="newStockLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="requestApprovalLabel">Barang Masuk / Keluar</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambah Barang Baru</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="/requestApproval" method="post" id="requestApprovalForm">
-            @csrf
+          <form action="/stock" method="post" id="addStockForm">
             <div class="modal-body">
-              <input type="text" class="form-control" id="request-approval-id" name="stock_id" required hidden>
               <div class="mb-3">
-                <label for="request-approval-name"
-                  class="form-label @error('request-approval-name') is-invalid @enderror">Nama
-                  Barang</label>
-                <input type="text" class="form-control" id="request-approval-name" name="name" disabled
-                  required>
-                @error('request-approval-name')
-                  <div class="invalid-feedback">
-                    {{ $message }}
-                  </div>
-                @enderror
-              </div>
-              <div class="mb-3">
-                <label for="request-approval-amount" class="form-label @error('amount') is-invalid @enderror">Jumlah
-                  Barang</label>
-                <input type="text" inputmode="numeric" class="form-control" id="request-approval-amount"
-                  name="amount" required>
+                <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
+                  Barang Baru</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}"
+                  required autofocus>
                 @error('name')
                   <div class="invalid-feedback">
                     {{ $message }}
@@ -258,35 +138,27 @@
                 @enderror
               </div>
               <div class="mb-3">
-                <h6 class="card-text fw-semibold mt-3">Barang Masuk/Keluar</h6>
-                <div class="d-flex justify-content-evenly align-items-center">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="is_entry" id="request-approval-entry"
-                      value="1" />
-                    <label class="form-check-label" for="request-approval-entry">
-                      Masuk </label>
+                <label for="amount" class="form-label">Jumlah Barang</label>
+                <input type="text" inputmode="numeric" class="form-control" id="amount" name="amount"
+                  value="{{ old('amount') }}" required autofocus>
+                @error('amount')
+                  <div class="invalid-feedback">
+                    {{ $message }}
                   </div>
-                  <div class="form-check ms-3">
-                    <input class="form-check-input" type="radio" name="is_entry" id="request-approval-outgoing"
-                      value="0" />
-                    <label class="form-check-label" for="request-approval-outgoing">
-                      Keluar </label>
-                  </div>
-                </div>
+                @enderror
               </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="btn-request-approval-"
-                onclick="requestApprovalConfirmation()">Update</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </div> --}}
   </section>
 
-  <script>
+  {{-- <script>
     $(document).ready(function() {
       var table = $('#stock-table').DataTable({
         scrollX: true,
@@ -766,5 +638,5 @@
         }
       });
     };
-  </script>
+  </script> --}}
 @endsection

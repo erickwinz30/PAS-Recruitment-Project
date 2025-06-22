@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Auth;
 
 class RequestApprovalController extends Controller
 {
+  public function index()
+  {
+    $requestApprovals = RequestApproval::with(['user', 'stock'])->get();
+    Log::info('Fetching request approvals: ', $requestApprovals->toArray());
+
+    return view('request.index', compact('requestApprovals'));
+  }
+
   public function getRequestData(Request $request)
   {
     try {

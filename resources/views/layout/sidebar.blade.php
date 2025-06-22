@@ -44,6 +44,13 @@
         <span>Stock</span>
       </a>
     </li><!-- End Dashboard Nav -->
+    <li class="nav-item">
+      {{-- {{ dd(Request::route()) }} --}}
+      <a class="nav-link {{ Request::is('request-approval') ? '' : 'collapsed' }}" href="/request-approval">
+        <i class="bi bi-database-exclamation"></i>
+        <span>Req. Approval</span>
+      </a>
+    </li><!-- End Dashboard Nav -->
 
     {{-- <li class="nav-item">
             <a class="nav-link {{ Request::is('dashboard/transaksi') || Request::is('dashboard/transaksi/*') ? '' : 'collapsed' }}"
