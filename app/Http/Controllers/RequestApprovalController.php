@@ -105,6 +105,15 @@ class RequestApprovalController extends Controller
         SendEmail::dispatch($admin->email, $mailable)->onQueue('default');
       }
 
+      //sending telegram notification to admin
+      foreach ($admins as $admin) {
+        try {
+          SendTelegram::dispatch($admin->telegram_chat_id, $notificationData)->onQueue('default');
+        } catch (\Exception $e) {
+          Log::error('Error sending Telegram notification: ' . $e->getMessage());
+        }
+      }
+
       // $notified = new RequestApprovalTelegram($notificationData);
       // Dispatch the job to send the email & telegram
       // SendTelegram::dispatch($notificationData)->onQueue('default');

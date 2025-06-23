@@ -13,7 +13,7 @@ class RequestApprovalTelegram extends Notification
 {
   use Queueable;
 
-  protected object $data;
+  protected object $notificationData;
 
 
   /**
@@ -21,9 +21,9 @@ class RequestApprovalTelegram extends Notification
    *
    * @return void
    */
-  public function __construct(Object $data)
+  public function __construct(Object $notificationData)
   {
-    $this->data = $data;
+    $this->notificationData = $notificationData;
   }
 
   /**
@@ -32,7 +32,7 @@ class RequestApprovalTelegram extends Notification
    * @param  mixed  $notifiable
    * @return array
    */
-  public function via(object $data)
+  public function via(object $notificationData)
   {
     return ['telegram'];
   }
@@ -45,17 +45,17 @@ class RequestApprovalTelegram extends Notification
    */
   public function toTelegram($notifiable)
   {
-    return TelegramMessage::create()
-      // Optional recipient user id.
-      ->to($notifiable->telegram_chat_id)
-      // ->to($data->phone_number)
+    $is_entry = $this->notificationData->is_entry ? 'Masuk' : 'Keluar';
 
-      // Markdown supported.
-      ->content(
-        "Hello there! Your text is: " . $this->data->text . "\n" .
-          "Your invoice has been *PAID*\n" .
-          "Thank you!"
-      );
+    $text = "Permintaan persetujuan dari " . $this->notificationData->user . " dengan informasi lebih lengkap:\n" .
+      "Barang       : " . $this->notificationData->stock_name . "\n" .
+      "Jumlah       : " . $this->notificationData->amount . "\n" .
+      "Masuk/Keluar : " . $is_entry . "\n\n" .
+      "Silahkan melakukan konfirmasi persetujuan melalui aplikasi.";
+
+    return TelegramMessage::create()
+      ->to($notifiable->telegram_chat_id)
+      ->content($text);
   }
 
   /**

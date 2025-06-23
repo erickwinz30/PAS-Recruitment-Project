@@ -16,7 +16,8 @@ class SendTelegram implements ShouldQueue
 {
   use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-  private object $data;
+  private string $telegram_chat_id;
+  private object $notificationData;
 
 
   /**
@@ -24,9 +25,10 @@ class SendTelegram implements ShouldQueue
    *
    * @return void
    */
-  public function __construct(Object $data)
+  public function __construct(string $telegram_chat_id, Object $notificationData)
   {
-    $this->data = $data;
+    $this->telegram_chat_id = $telegram_chat_id;
+    $this->notificationData = $notificationData;
   }
 
   /**
@@ -37,12 +39,14 @@ class SendTelegram implements ShouldQueue
   public function handle()
   {
     try {
-      $user = User::whereNotNull('telegram_chat_id')
-        ->where('telegram_chat_id', '!=', '')
-        ->first();
+      // $user = User::whereNotNull('telegram_chat_id')
+      //   ->where('telegram_chat_id', '!=', '')
+      //   ->first();
 
-      $notifiable = new TelegramNotifiable($user->telegram_chat_id);
-      $notifiable->notify(new RequestApprovalTelegram($this->data));
+      $notifiable = new TelegramNotifiable($this->telegram_chat_id);
+      $notifiable->notify(new RequestApprovalTelegram($this->notificationData));
+
+      Log::info('Telegram notification sent successfully to chat ID: ' . $this->telegram_chat_id);
     } catch (\Exception $e) {
       Log::error('Error sending Telegram notification: ' . $e->getMessage());
     }
