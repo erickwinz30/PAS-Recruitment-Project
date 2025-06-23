@@ -36,6 +36,10 @@ Route::get('/registration', [RegistrationController::class, 'index']);
 Route::post('/registration', [RegistrationController::class, 'store']);
 
 Route::middleware('auth')->group(function () {
+  Route::get('/', 'DashboardController@index')->name('dashboard');
+  // Fetch dashboard data
+  Route::get('/dashboard/fetch', 'DashboardController@fetch')->name('dashboard.data');
+
   // Route::get('/', [StockController::class, 'index'])->name('homepage');
   Route::resource('/stock', 'StockController');
 

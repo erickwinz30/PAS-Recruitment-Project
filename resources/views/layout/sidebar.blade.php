@@ -21,6 +21,14 @@
 
       <li class="nav-item">
         {{-- {{ dd(Request::route()) }} --}}
+        <a class="nav-link {{ Request::is('/') ? '' : 'collapsed' }}" href="/">
+          <i class="bi bi-speedometer"></i>
+          <span>Dashboard</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+
+      <li class="nav-item">
+        {{-- {{ dd(Request::route()) }} --}}
         <a class="nav-link {{ Request::is('users') ? '' : 'collapsed' }}" href="/users">
           <i class="bi bi-person-gear"></i>
           <span>User</span>
