@@ -32,4 +32,14 @@ class LoginController extends Controller
       return redirect()->back()->with('error', 'Login failed. Please try again.');
     }
   }
+
+  public function logout(Request $request)
+  {
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login');
+  }
 }

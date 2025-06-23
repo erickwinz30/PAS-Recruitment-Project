@@ -9,37 +9,36 @@
     <i class="bi bi-list toggle-sidebar-btn"></i>
   </div><!-- End Logo -->
 
-  <div>
-    <p class="m-0 me-3 fw-semibold" style="color: #012970">{{ auth()->user()->name }}</p>
-  </div>
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+      <!-- Toggler -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-  {{-- <div>
-        @if (Request::is('dashboard/transaksi'))
-            <div class="me-4">
-                <a href="/dashboard/transaksiBaru" class="btn btn-success">
-                    <i class="bi bi-plus me-1"></i>Transaksi
-                </a>
-            </div>
-        @elseif (Request::is('dashboard/kasir'))
-            <div class="me-4">
-                <button type="button" class="btn btn-success d-inline" data-bs-toggle='modal'
-                    data-bs-target='#inputModal'>
-                    <i class="bi bi-plus" style="margin-right: 2px;"></i>Kasir
-                </button>
-            </div>
-        @elseif (Request::is('dashboard/voucher'))
-            <div class="me-4">
-                <a href="/dashboard/voucher/create" type="button" class="btn btn-success d-inline">
-                    <i class="bi bi-plus me-1"></i>Voucher
-                </a>
-            </div>
-        @elseif (Request::is('dashboard/challenge'))
-            <div class="me-4">
-                <a href="/dashboard/challenge/create" type="button" class="btn btn-success d-inline">
-                    <i class="bi bi-plus me-1"></i>Challenge
-                </a>
-            </div>
-        @endif --}}
-  </div>
-
+      <!-- Collapsible content -->
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              {{ auth()->user()->name }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <form action="/logout" method="POST" id="logout-form" style="display: :none;">
+                  @csrf
+                  <button type="submit" class="dropdown-item d-flex align-items-center">
+                    <i class="bi bi-box-arrow-right me-2"></i>
+                    <span>Log Out</span>
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 </header><!-- End Header -->

@@ -30,6 +30,8 @@ use NotificationChannels\Telegram\TelegramUpdates;
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate']);
+Route::post('/logout', 'LoginController@logout')->name('logout');
+
 Route::get('/registration', [RegistrationController::class, 'index']);
 Route::post('/registration', [RegistrationController::class, 'store']);
 
