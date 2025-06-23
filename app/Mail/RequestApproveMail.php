@@ -11,16 +11,16 @@ class RequestApproveMail extends Mailable
 {
   use Queueable, SerializesModels;
 
-  protected $data;
+  protected $notificationData;
 
   /**
    * Create a new message instance.
    *
    * @return void
    */
-  public function __construct($data)
+  public function __construct(Object $notificationData)
   {
-    $this->data = $data;
+    $this->notificationData = $notificationData;
   }
 
   /**
@@ -35,12 +35,17 @@ class RequestApproveMail extends Mailable
     //   'text' => $this->data->text,
     // ]);
 
-    return $this->from('your@email.com', 'Nama Pengirim')
-      ->subject('Permintaan Approval Baru')
+    $is_entry = $this->notificationData->is_entry ? 'Masuk' : 'Keluar';
+
+    return $this->from('pas_@email.com', 'Sistem PAS')
+      ->subject('Permintaan Persetujuan Barang ' . $is_entry . ' untuk ' . $this->notificationData->stock_name)
       ->view('mail.result')
       ->with([
-        'email' => $this->data->email,
-        'text' => $this->data->text,
+        'text' => "Permintaan persetujuan dari " . $this->notificationData->user . " dengan informasi lebih lengkap:<br>" .
+          "Barang       : " . $this->notificationData->stock_name . "<br>" .
+          "Jumlah       : " . $this->notificationData->amount . "<br>" .
+          "Masuk/Keluar : " . $is_entry . "<br><br>" .
+          "Silahkan melakukan konfirmasi persetujuan melalui aplikasi.",
       ]);
   }
 }

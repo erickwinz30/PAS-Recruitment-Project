@@ -9,8 +9,7 @@
   </head>
 
   <body>
-    <p>Email: {{ $email }}</p>
-    <p>Text: {{ $text }}</p>
+    <p>{!! $text !!}</p>
   </body>
 
 </html>

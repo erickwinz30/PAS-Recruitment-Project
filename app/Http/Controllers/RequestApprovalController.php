@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Stock;
 use App\RequestApproval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendEmail;
+use App\Jobs\SendTelegram;
+use App\Mail\RequestApproveMail;
+use App\Notifications\RequestApprovalTelegram;
+
+
 
 class RequestApprovalController extends Controller
 {
@@ -76,15 +83,35 @@ class RequestApprovalController extends Controller
 
       $validatedData['user_id'] = Auth::user()->id; // Assuming you have user authentication in place
 
-      // Create a new request approval
       $requestApproval = RequestApproval::create($validatedData);
-
       Log::info('Request approval created successfully: ', $requestApproval->toArray());
+
+      //add notification for admin
+      $notificationData = (object) [
+        'stock_name' => $requestApproval->stock->name,
+        'user' => $requestApproval->user->name,
+        'is_entry' => $validatedData['is_entry'] ? 'Masuk' : 'Keluar',
+        'amount' => $validatedData['amount'],
+      ];
+
+      Log::info('Notification Data: ', (array) $notificationData);
+
+      //get all admin email and telegram chat id
+      $admins = User::select('email', 'telegram_chat_id')->whereNotNull('email')->where('is_admin', true)->get();
+
+      //sending email to admin
+      $mailable = new RequestApproveMail($notificationData);
+      foreach ($admins as $admin) {
+        SendEmail::dispatch($admin->email, $mailable)->onQueue('default');
+      }
+
+      // $notified = new RequestApprovalTelegram($notificationData);
+      // Dispatch the job to send the email & telegram
+      // SendTelegram::dispatch($notificationData)->onQueue('default');
 
       return response()->json([
         'success' => true,
         'message' => 'Stock masuk/keluar berhasil direquest! Tunggu approval dari admin.',
-        // 'data' => $requestApproval,
       ]);
     } catch (\Exception $e) {
       Log::error('Error processing request approval: ' . $e->getMessage());

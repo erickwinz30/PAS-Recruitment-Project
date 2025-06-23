@@ -41,10 +41,12 @@
               <div>
                 <h5 class="card-title">Stock</h5>
               </div>
-              <div>
-                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                  data-bs-target="#addNewStockModal">Baru</button>
-              </div>
+              @if (auth()->user()->is_admin)
+                <div>
+                  <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#addNewStockModal">Baru</button>
+                </div>
+              @endif
             </div>
 
             <!-- Table with stripped rows -->
