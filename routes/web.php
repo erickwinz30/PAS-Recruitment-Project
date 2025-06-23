@@ -37,7 +37,13 @@ Route::middleware('auth')->group(function () {
   // Route::get('/', [StockController::class, 'index'])->name('homepage');
   Route::resource('/stock', 'StockController');
 
+  //request approval routes
   Route::get('/request-approval', 'RequestApprovalController@index')->name('request-approval.index');
+  Route::get('/request-approval/approved', 'RequestApprovalController@requestApproved')->name('request-approval.approved');
+  Route::get('/request-approval/rejected', 'RequestApprovalController@requestRejected')->name('request-approval.rejected');
+  Route::get('/request-approval/all', 'RequestApprovalController@allRequest')->name('request-approval.all');
+
+  //request approval from user
   Route::get('/getRequestData', 'RequestApprovalController@getRequestData');
   Route::post('/requestApproval', 'RequestApprovalController@requestApproval');
 

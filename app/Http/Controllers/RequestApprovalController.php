@@ -19,6 +19,30 @@ class RequestApprovalController extends Controller
     return view('request.index', compact('requestApprovals'));
   }
 
+  public function requestApproved()
+  {
+    $requestApprovals = RequestApproval::where('status', 'approved')->with(['user', 'stock'])->get();
+    Log::info('Fetching approved request approvals: ', $requestApprovals->toArray());
+
+    return view('request.index', compact('requestApprovals'));
+  }
+
+  public function requestRejected()
+  {
+    $requestApprovals = RequestApproval::where('status', 'rejected')->with(['user', 'stock'])->get();
+    Log::info('Fetching rejected request approvals: ', $requestApprovals->toArray());
+
+    return view('request.index', compact('requestApprovals'));
+  }
+
+  public function allRequest()
+  {
+    $requestApprovals = RequestApproval::with(['user', 'stock'])->get();
+    Log::info('Fetching all request approvals: ', $requestApprovals->toArray());
+
+    return view('request.index', compact('requestApprovals'));
+  }
+
   public function getRequestData(Request $request)
   {
     try {

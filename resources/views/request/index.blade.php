@@ -20,6 +20,18 @@
               <div>
                 <h5 class="card-title">Daftar Permintaan Persetujuan</h5>
               </div>
+              <div class="col-12 col-md-4 mt-3">
+                <div class="btn-group w-100 w-md-auto" role="group">
+                  <a href="{{ route('request-approval.index') }}"
+                    class="btn btn-outline-primary {{ Request::is('request-approval') ? 'active' : '' }}">Pending</a>
+                  <a href="{{ route('request-approval.approved') }}"
+                    class="btn btn-outline-primary {{ Request::is('request-approval/approved') ? 'active' : '' }}">Diterima</a>
+                  <a href="{{ route('request-approval.rejected') }}"
+                    class="btn btn-outline-primary {{ Request::is('request-approval/rejected') ? 'active' : '' }}">Ditolak</a>
+                  <a href="{{ route('request-approval.all') }}"
+                    class="btn btn-outline-primary {{ Request::is('request-approval/all') ? 'active' : '' }}">Semua</a>
+                </div>
+              </div>
             </div>
 
             <!-- Table with stripped rows -->
@@ -85,10 +97,14 @@
                         @endif
                         <td>
                           @if (auth()->user()->is_admin)
-                            <button type="button" class="btn btn-success" id="btn-accept-approval"
-                              onclick="acceptRequestConfirmation('{{ $request->id }}')">Terima</button>
-                            <button type="button" class="btn btn-danger" id="btn-reject-approval"
-                              onclick="rejectRequestConfirmation('{{ $request->id }}')">Tolak</button>
+                            @if ($request->status == 'pending')
+                              <button type="button" class="btn btn-success" id="btn-accept-approval"
+                                onclick="acceptRequestConfirmation('{{ $request->id }}')">Terima</button>
+                              <button type="button" class="btn btn-danger" id="btn-reject-approval"
+                                onclick="rejectRequestConfirmation('{{ $request->id }}')">Tolak</button>
+                            @else
+                              <p class="card-text">Sudah diapprove</p>
+                            @endif
                           @else
                             <p>Anda tidak memiliki akses</p>
                           @endif
