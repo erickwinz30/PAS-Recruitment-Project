@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
       'email' => 'admin@gmail.com',
       'phone_number' => '+6289666020017',
       'telegram_chat_id' => "856041698",
+      'username' => "erickwinz30",
       'is_admin' => true,
       'is_deleted' => false,
       'password' => bcrypt('admin123'),

@@ -1,42 +1,6 @@
 <!-- ======= Sidebar ======= -->
 <aside id="sidebar" class="sidebar">
-  {{-- <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <span class="fs-6 ms-1">(
-                        @if (Auth::check() && Auth::user()->is_admin)
-                            Admin
-                        @endif
-                        )
-                    </span>
-                </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-                data-bs-parent="#accordionExample">
-                <div class="accordion-body">
-                    <form action="/dashboard/logout" method="POST" id="logout-form" style="display: :none;">
-                        @csrf
-                    </form>
-                    <a class="dropdown-item d-flex align-items-center" href="#"
-                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="bi bi-box-arrow-right me-2"></i>
-                        <span>Log Out</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
   <ul class="sidebar-nav" id="sidebar-nav">
-    {{-- <li class="nav-item">
-            <a class="nav-link {{ Request::is('/dashboard') ? '' : 'collapsed' }}" href="{{ route('homepage') }}">
-                <i class="bi bi-grid"></i>
-                <span>Dashboard</span>
-            </a>
-        </li><!-- End Dashboard Nav --> --}}
     <li class="nav-item">
       {{-- {{ dd(Request::route()) }} --}}
       <a class="nav-link {{ Request::is('stock') ? '' : 'collapsed' }}" href="/stock">
@@ -51,6 +15,20 @@
         <span>Req. Approval</span>
       </a>
     </li><!-- End Dashboard Nav -->
+
+    @if (auth()->user()->is_admin)
+      <li class="nav-heading">Admin</li>
+
+      <li class="nav-item">
+        {{-- {{ dd(Request::route()) }} --}}
+        <a class="nav-link {{ Request::is('users') ? '' : 'collapsed' }}" href="/users">
+          <i class="bi bi-person-gear"></i>
+          <span>User</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+    @endif
+
+
 
     {{-- <li class="nav-item">
             <a class="nav-link {{ Request::is('dashboard/transaksi') || Request::is('dashboard/transaksi/*') ? '' : 'collapsed' }}"

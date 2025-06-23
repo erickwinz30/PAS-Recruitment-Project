@@ -53,6 +53,8 @@ Route::middleware('auth')->group(function () {
   Route::post('/request-approval/accept/{requestId}', 'RequestApprovalController@acceptApproval');
   //reject approval
   Route::post('/request-approval/reject/{requestId}', 'RequestApprovalController@rejectApproval');
+
+  Route::resource('/users', 'UserController');
 });
 
 Route::get('/input', function () {

@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
       $table->string('name');
       $table->string('email')->unique();
       $table->string('phone_number')->unique();
+      $table->string('username')->nullable();
       $table->string('telegram_chat_id')->nullable();
       $table->boolean('is_admin');
       $table->boolean('is_deleted')->default(false);

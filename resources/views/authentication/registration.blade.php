@@ -70,9 +70,8 @@
 
                     <div class="pt-4 pb-2">
                       <h5 class="card-title text-center pb-0 fs-4">Registrasi</h5>
-                      <p class="text-center small">Masukkan username, email, nomor telepon, &
-                        password untuk
-                        registrasi</p>
+                      <p class="text-center small">Masukkan nama, email, nomor telepon, &
+                        password untuk registrasi</p>
                     </div>
 
                     <form action='/registration' method="POST" class="row g-3 needs-validation" novalidate>
@@ -84,19 +83,6 @@
                             placeholder="Masukkan name..." @error('name') is-invalid @enderror required>
                           {{-- <div class="invalid-feedback">Please enter your name.</div> --}}
                           @error('name')
-                            <div class="invalid-feedback">
-                              {{ $message }}
-                            </div>
-                          @enderror
-                        </div>
-                      </div>
-                      <div class="col-12">
-                        <label for="username" class="form-label">Username</label>
-                        <div class="input-group has-validation">
-                          <input type="text" name="username" class="form-control" id="username"
-                            placeholder="Masukkan username..." @error('username') is-invalid @enderror required>
-                          {{-- <div class="invalid-feedback">Please enter your username.</div> --}}
-                          @error('username')
                             <div class="invalid-feedback">
                               {{ $message }}
                             </div>
