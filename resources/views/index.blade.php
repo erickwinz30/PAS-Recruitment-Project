@@ -6,7 +6,7 @@
     <nav>
       <ol class="breadcrumb">
         {{-- <li class="breadcrumb-item"><a href="/dashboard/admin">Admin</a></li> --}}
-        <li class="breadcrumb-item active"><a href="/">Stock</a></li>
+        <li class="breadcrumb-item active"><a href="/stock">Stock</a></li>
       </ol>
     </nav>
   </div><!-- End Page Title -->
@@ -278,7 +278,7 @@
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="button" class="btn btn-primary" id="btn-request-approval-"
-                onclick="requestApprovalConfirmation()">Update</button>
+                onclick="requestApprovalConfirmation()">Request</button>
             </div>
           </form>
         </div>

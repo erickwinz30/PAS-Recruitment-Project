@@ -34,9 +34,7 @@
                     <th>Masuk/Keluar</th>
                     <th>Tanggal Request</th>
                     <th>Status Approval</th>
-                    @if (auth()->user()->is_admin)
-                      <th>Aksi</th>
-                    @endif
+                    <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -85,30 +83,20 @@
                             </span>
                           </td>
                         @endif
-                        @if (auth()->user()->is_admin)
-                          <td>
-                            @if (auth()->user()->is_admin)
-                              <button type="button" class="btn btn-success" id="btn-accept-approval"
-                                onclick="acceptRequestConfirmation('{{ $request->id }}')">Terima</button>
-                              <button type="button" class="btn btn-danger" id="btn-reject-approval">Tolak</button>
-                            @endif
-                          </td>
-                        @endif
+                        <td>
+                          @if (auth()->user()->is_admin)
+                            <button type="button" class="btn btn-success" id="btn-accept-approval"
+                              onclick="acceptRequestConfirmation('{{ $request->id }}')">Terima</button>
+                            <button type="button" class="btn btn-danger" id="btn-reject-approval"
+                              onclick="rejectRequestConfirmation('{{ $request->id }}')">Tolak</button>
+                          @else
+                            <p>Anda tidak memiliki akses</p>
+                          @endif
+                        </td>
                       </tr>
                     @endforeach
-                  @else
-                    <tr>
-                      <td colspan="7" class="text-center">No transactions found for the selected date range.</td>
-                    </tr>
                   @endif
                 </tbody>
-                {{-- <tfoot>
-                  <tr>
-                    <th colspan="10" class="text-right">Total Penjualan:</th>
-                    <th id="totalHarga">Rp 0</th>
-                    <th colspan="1"></th>
-                  </tr>
-                </tfoot> --}}
               </table>
             </div>
             <!-- End Table with stripped rows -->
@@ -116,47 +104,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Create Modal -->
-    {{-- <div class="modal fade" id="addNewStockModal" tabindex="-1" aria-labelledby="newStockLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambah Barang Baru</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form action="/stock" method="post" id="addStockForm">
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="name" class="form-label @error('name') is-invalid @enderror">Nama
-                  Barang Baru</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}"
-                  required autofocus>
-                @error('name')
-                  <div class="invalid-feedback">
-                    {{ $message }}
-                  </div>
-                @enderror
-              </div>
-              <div class="mb-3">
-                <label for="amount" class="form-label">Jumlah Barang</label>
-                <input type="text" inputmode="numeric" class="form-control" id="amount" name="amount"
-                  value="{{ old('amount') }}" required autofocus>
-                @error('amount')
-                  <div class="invalid-feedback">
-                    {{ $message }}
-                  </div>
-                @enderror
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div> --}}
   </section>
 
   <script>
@@ -224,13 +171,13 @@
 
     function acceptRequestConfirmation(requestId) {
       Swal.fire({
-        title: "Yakin ingin menerima request penambahan stock ini?",
+        title: "Yakin ingin menerima request approval ini?",
         text: "Aksi ini tidak bisa mengembalikan data ke semula!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#2980B9",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Yes, accept it!"
       }).then((result) => {
         if (result.isConfirmed) {
           console.log("Accept confirmed. Trying to add stock data...");
@@ -310,22 +257,89 @@
       });
     };
 
-    // function requestApprovalConfirmation() {
-    //   Swal.fire({
-    //     title: "Yakin ingin melakukan penambahan / pengurangan data stock?",
-    //     text: "Aksi ini akan diinformasikan ke admin untuk dilakukan konfirmasi!",
-    //     icon: "warning",
-    //     showCancelButton: true,
-    //     confirmButtonColor: "#2980B9",
-    //     cancelButtonColor: "#d33",
-    //     confirmButtonText: "Yes, request it!"
-    //   }).then((result) => {
-    //     if (result.isConfirmed) {
-    //       console.log("Requesting Approval Confirmed. Trying to request approval to admin...");
-    //       // document.getElementById('editStockForm').submit();
-    //       submitRequestApproval();
-    //     }
-    //   });
-    // }
+    function rejectRequestConfirmation(requestId) {
+      Swal.fire({
+        title: "Yakin ingin menolak request approval stock ini?",
+        text: "Aksi ini tidak bisa mengembalikan data ke semula!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#2980B9",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, reject it!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log("reject confirmed. Trying to reject approval...");
+          // document.getElementById('deleteForm' + stockId).submit();
+          // $(`#deleteForm${stockId}`).submit();
+          submitRejectRequest(requestId);
+        }
+      });
+    }
+
+    function submitRejectRequest(requestId) {
+      var url = `/request-approval/reject/${requestId}`;
+
+      $.ajax({
+        url: url,
+        type: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        },
+        success: function(response) {
+          console.log("Successfully reject request approval:", response);
+
+          $('#dynamic-alert').remove();
+
+          var alertHtml = `
+          <div class="row justify-content-center" id="dynamic-alert">
+            <div class="alert alert-success alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
+              ${response.message}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          </div>
+        `;
+
+          // $('#dynamic-alert').remove();
+          $('.pagetitle').after(alertHtml);
+
+          // Refresh tabel stock (ambil ulang data via AJAX)
+          refreshStockTable();
+        },
+        error: function(xhr) {
+          // Hapus alert error sebelumnya jika ada
+          $('#dynamic-alert').remove();
+
+          // Ambil pesan error dari response
+          var message = 'Terjadi kesalahan.';
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+          } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+            message = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+          }
+
+          var alertHtml = `
+            <div class="row justify-content-center" id="dynamic-alert">
+              <div class="alert alert-danger alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            </div>
+          `;
+          $('.pagetitle').after(alertHtml);
+
+          var errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : null;
+          if (errors) {
+            if (errors.name) {
+              $('#name').addClass('is-invalid');
+              $('#name').next('.invalid-feedback').text(errors.name[0]);
+            }
+            if (errors.amount) {
+              $('#amount').addClass('is-invalid');
+              $('#amount').next('.invalid-feedback').text(errors.amount[0]);
+            }
+          }
+        }
+      });
+    };
   </script>
 @endsection

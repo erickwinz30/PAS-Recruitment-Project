@@ -114,4 +114,28 @@ class RequestApprovalController extends Controller
       ], 500);
     }
   }
+
+  public function rejectApproval(string $requestId)
+  {
+    try {
+      Log::info('Rejecting request: ', ['requestId' => $requestId]);
+
+      $requestApproval = RequestApproval::findOrFail($requestId);
+      $requestApproval->status = 'rejected';
+      $requestApproval->save();
+
+      Log::info('Request approval rejected successfully: ', $requestApproval->toArray());
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Request approval berhasil ditolak.',
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error rejecting request approval: ' . $e->getMessage());
+      return response()->json([
+        'success' => false,
+        'message' => 'Gagal menolak request approval.',
+      ], 500);
+    }
+  }
 }
