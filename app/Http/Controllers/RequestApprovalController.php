@@ -13,7 +13,7 @@ class RequestApprovalController extends Controller
 {
   public function index()
   {
-    $requestApprovals = RequestApproval::with(['user', 'stock'])->get();
+    $requestApprovals = RequestApproval::where('status', 'pending')->with(['user', 'stock'])->get();
     Log::info('Fetching request approvals: ', $requestApprovals->toArray());
 
     return view('request.index', compact('requestApprovals'));
@@ -70,6 +70,48 @@ class RequestApprovalController extends Controller
           'message' => 'Gagal memproses request approval.',
         ], 500);
       }
+    }
+  }
+
+  public function acceptApproval(string $requestId)
+  {
+    try {
+      Log::info('Accepting request approval: ', ['requestId' => $requestId]);
+
+      $requestApproval = RequestApproval::findOrFail($requestId);
+      $requestApproval->status = 'approved';
+      $requestApproval->save();
+
+      Log::info('Request approval accepted successfully: ', $requestApproval->toArray());
+
+      $currentAmount = $requestApproval->amount;
+      $stock = Stock::findOrFail($requestApproval->stock->id);
+
+      if ($requestApproval->is_entry) {
+        $addedAmount = $stock->amount += $currentAmount;
+        Log::info('Stock amount increased: ', ['stockId' => $stock->id, 'amount' => $addedAmount]);
+      } else {
+        if ($stock->amount < $currentAmount) {
+          return response()->json([
+            'success' => false,
+            'message' => 'Stock tidak cukup untuk permintaan ini.',
+          ], 400);
+        }
+        $decreasedAmount = $stock->amount -= $currentAmount;
+        Log::info('Stock amount decreased: ', ['stockId' => $stock->id, 'amount' => $decreasedAmount]);
+      }
+      $stock->save();
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Request approval berhasil diterima dan telah diproses.',
+      ]);
+    } catch (\Exception $e) {
+      Log::error('Error accepting request approval: ' . $e->getMessage());
+      return response()->json([
+        'success' => false,
+        'message' => 'Gagal menerima request approval.',
+      ], 500);
     }
   }
 }

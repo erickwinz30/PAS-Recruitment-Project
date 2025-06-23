@@ -24,7 +24,7 @@
 
             <!-- Table with stripped rows -->
             <div class="table table-responsive">
-              <table class="table" id="stock-table">
+              <table class="table" id="request-approval-table">
                 <thead>
                   <tr>
                     <th>No</th>
@@ -88,7 +88,8 @@
                         @if (auth()->user()->is_admin)
                           <td>
                             @if (auth()->user()->is_admin)
-                              <button type="button" class="btn btn-success" id="btn-accept-approval">Terima</button>
+                              <button type="button" class="btn btn-success" id="btn-accept-approval"
+                                onclick="acceptRequestConfirmation('{{ $request->id }}')">Terima</button>
                               <button type="button" class="btn btn-danger" id="btn-reject-approval">Tolak</button>
                             @endif
                           </td>
@@ -158,12 +159,16 @@
     </div> --}}
   </section>
 
-  {{-- <script>
+  <script>
     $(document).ready(function() {
-      var table = $('#stock-table').DataTable({
+      var table = $('#request-approval-table').DataTable({
         scrollX: true,
         columns: [{
             data: 'no',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'user',
             defaultContent: '<i>Not set</i>'
           },
           {
@@ -175,7 +180,15 @@
             defaultContent: '<i>Not set</i>'
           },
           {
+            data: 'is_entry',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
             data: 'created_at',
+            defaultContent: '<i>Not set</i>'
+          },
+          {
+            data: 'status',
             defaultContent: '<i>Not set</i>'
           },
           {
@@ -190,145 +203,6 @@
 
       });
 
-      $('#addStockForm').on('submit', function(e) {
-        e.preventDefault();
-
-        var form = $(this);
-        var url = form.attr('action');
-        var formData = form.serialize();
-
-        $.ajax({
-          url: url,
-          type: 'POST',
-          data: formData,
-          headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-          },
-          success: function(response) {
-            $('#addNewStockModal').modal('hide');
-            $('#addStockForm')[0].reset();
-
-            setTimeout(function() {
-              $('.modal-backdrop').remove();
-              $('body').removeClass('modal-open');
-              $('body').css({
-                'overflow': '',
-                'padding-right': ''
-              });
-              $('#addNewStockModal').removeClass('show').attr('aria-modal', null).css('display',
-                'none');
-            }, 500);
-
-            $('#dynamic-alert').remove();
-
-            var alertHtml = `
-              <div class="row justify-content-center" id="dynamic-alert">
-                <div class="alert alert-success alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-                  ${response.message}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-              </div>
-            `;
-
-            // $('#dynamic-alert').remove();
-            $('.pagetitle').after(alertHtml);
-
-            // Refresh tabel stock (ambil ulang data via AJAX)
-            refreshStockTable();
-          },
-          error: function(xhr) {
-            // Hapus alert error sebelumnya jika ada
-            $('#dynamic-alert').remove();
-
-            // Ambil pesan error dari response
-            var message = 'Terjadi kesalahan.';
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-              message = xhr.responseJSON.message;
-            } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-              message = Object.values(xhr.responseJSON.errors).flat().join('<br>');
-            }
-
-            var alertHtml = `
-              <div class="row justify-content-center" id="dynamic-alert">
-                <div class="alert alert-danger alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-                  ${message}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-              </div>
-            `;
-            $('.pagetitle').after(alertHtml);
-
-            var errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : null;
-            if (errors) {
-              if (errors.name) {
-                $('#name').addClass('is-invalid');
-                $('#name').next('.invalid-feedback').text(errors.name[0]);
-              }
-              if (errors.amount) {
-                $('#amount').addClass('is-invalid');
-                $('#amount').next('.invalid-feedback').text(errors.amount[0]);
-              }
-            }
-          }
-        });
-      });
-
-      $(document).on('click', '#btn-edit', function() {
-        var stockId = $(this).data('edit-id');
-
-        // Ambil data stock via AJAX
-        $.ajax({
-          url: '/stock/' + stockId + '/edit',
-          type: 'GET',
-          success: function(data) {
-            $('#edit-id').val(data.id);
-            $('#editStockForm').attr('action', '/stock/' + data.id);
-            $('#editStockForm input[name="id"]').val(data.id);
-            $('#editStockForm input[name="name"]').val(data.name);
-            $('#editStockForm input[name="amount"]').val(data.amount);
-            $('#btn-update-').attr('id', 'btn-update-' + data.id);
-
-            // Tampilkan modal edit
-            $('#editStockModal').modal('show');
-          },
-          error: function(xhr) {
-            alert('Gagal mengambil data stock.');
-          }
-        });
-      });
-
-      $(document).on('click', '#btn-request-approval', function() {
-        var stockId = $(this).data('stock-id');
-        console.log("Request Approval for stock ID: " + stockId);
-
-        // Ambil data stock via AJAX
-        $.ajax({
-          url: '/getRequestData',
-          type: 'GET',
-          data: {
-            id: stockId
-          },
-          success: function(data) {
-            // $('#request-approval-id').val(data.id);
-            // $('#request-approval-id').attr('action', '/stock/' + data.id);
-            $('#requestApprovalForm input[name="stock_id"]').val(data.id);
-            $('#requestApprovalForm input[name="name"]').val(data.name);
-            // $('#requestApprovalForm input[name="amount"]').val(data.amount);
-            $('#btn-request-approval-').attr('id', 'btn-request-approval-' + data.id);
-
-            // Tampilkan modal edit
-            $('#requestApprovalModal').modal('show');
-            console.log("Data received for request approval:", data);
-
-            console.log("ID:", $('#request-approval-id').val());
-            console.log("Name:", $('#request-approval-name').val());
-          },
-          error: function(xhr) {
-            alert('Gagal mengambil data stock.');
-          }
-        });
-      });
-
       // Reset button functionality (updated)
       // $('#tombolReset').on('click', function() {
       //   table.search('').columns().search('').draw();
@@ -337,125 +211,21 @@
 
     function refreshStockTable() {
       $.ajax({
-        url: '/stock', // Pastikan route ini mengembalikan partial view atau JSON data
+        url: '/request-approval',
         type: 'GET',
         dataType: 'html',
         success: function(data) {
           // Ambil tbody baru dari response dan replace tbody lama
-          var newTbody = $(data).find('#stock-table tbody').html();
-          $('#stock-table tbody').html(newTbody);
+          var newTbody = $(data).find('#request-approval-table tbody').html();
+          $('#request-approval-table tbody').html(newTbody);
         }
       });
     }
 
-    function submitEditForm() {
-      var form = $('#editStockForm');
-      var url = form.attr('action');
-      var formData = form.serialize();
-
-      $.ajax({
-        url: url,
-        type: 'POST',
-        data: formData,
-        headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        },
-        // success: function(response) {
-        //   console.log("success")
-        // },
-        // error: function(xhr) {
-        //   console.log("error")
-        // }
-        success: function(response) {
-          $('#editStockModal').modal('hide');
-          $('#editStockForm')[0].reset();
-
-          setTimeout(function() {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            $('body').css({
-              'overflow': '',
-              'padding-right': ''
-            });
-            $('#editStockModal').removeClass('show').attr('aria-modal', null).css('display',
-              'none');
-          }, 500);
-
-          $('#dynamic-alert').remove();
-
-          var alertHtml = `
-            <div class="row justify-content-center" id="dynamic-alert">
-              <div class="alert alert-success alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-                ${response.message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-          `;
-
-          // $('#dynamic-alert').remove();
-          $('.pagetitle').after(alertHtml);
-
-          refreshStockTable();
-        },
-        error: function(xhr) {
-          // Hapus alert error sebelumnya jika ada
-          $('#dynamic-alert').remove();
-
-          // Ambil pesan error dari response
-          var message = 'Terjadi kesalahan.';
-          if (xhr.responseJSON && xhr.responseJSON.message) {
-            message = xhr.responseJSON.message;
-          } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-            message = Object.values(xhr.responseJSON.errors).flat().join('<br>');
-          }
-
-          var alertHtml = `
-            <div class="row justify-content-center" id="dynamic-alert">
-              <div class="alert alert-danger alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-          `;
-          $('.pagetitle').after(alertHtml);
-
-          var errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : null;
-          if (errors) {
-            if (errors.name) {
-              $('#name').addClass('is-invalid');
-              $('#name').next('.invalid-feedback').text(errors.name[0]);
-            }
-            if (errors.amount) {
-              $('#amount').addClass('is-invalid');
-              $('#amount').next('.invalid-feedback').text(errors.amount[0]);
-            }
-          }
-        }
-      });
-    };
-
-    function editConfirmation() {
+    function acceptRequestConfirmation(requestId) {
       Swal.fire({
-        title: "Yakin ingin meng-edit data stock?",
-        text: "Aksi ini tidak bisa mengembalikan data!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#2980B9",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, update it!"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          console.log("Edit Confirmed. Trying to edit stock data...");
-          // document.getElementById('editStockForm').submit();
-          submitEditForm();
-        }
-      });
-    }
-
-    function deleteConfirmation(stockId) {
-      Swal.fire({
-        title: "Yakin ingin menghapus data stock?",
-        text: "Aksi ini tidak bisa mengembalikan data!",
+        title: "Yakin ingin menerima request penambahan stock ini?",
+        text: "Aksi ini tidak bisa mengembalikan data ke semula!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#2980B9",
@@ -463,28 +233,28 @@
         confirmButtonText: "Yes, delete it!"
       }).then((result) => {
         if (result.isConfirmed) {
-          console.log("Delete Confirmed. Trying to delete stock data...");
+          console.log("Accept confirmed. Trying to add stock data...");
           // document.getElementById('deleteForm' + stockId).submit();
           // $(`#deleteForm${stockId}`).submit();
-          submitDeleteForm(stockId);
+          submitAcceptRequest(requestId);
         }
       });
     }
 
-    function submitDeleteForm(stockId) {
-      var form = $(`#deleteForm${stockId}`);
-      var url = form.attr('action');
-      var formData = form.serialize();
+    function submitAcceptRequest(requestId) {
+      // var form = $(`#deleteForm${stockId}`);
+      var url = `/request-approval/accept/${requestId}`;
+      // var formData = form.serialize();
 
       $.ajax({
         url: url,
         type: 'POST',
-        data: formData,
+        // data: formData,
         headers: {
           'X-CSRF-TOKEN': '{{ csrf_token() }}',
         },
         success: function(response) {
-          console.log("Delete stock data demo success")
+          console.log("Successfully accepted request approval and add stock:", response);
 
           $('#dynamic-alert').remove();
 
@@ -540,103 +310,22 @@
       });
     };
 
-    function requestApprovalConfirmation() {
-      Swal.fire({
-        title: "Yakin ingin melakukan penambahan / pengurangan data stock?",
-        text: "Aksi ini akan diinformasikan ke admin untuk dilakukan konfirmasi!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#2980B9",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, request it!"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          console.log("Requesting Approval Confirmed. Trying to request approval to admin...");
-          // document.getElementById('editStockForm').submit();
-          submitRequestApproval();
-        }
-      });
-    }
-
-    function submitRequestApproval() {
-      var form = $(`#requestApprovalForm`);
-      var url = form.attr('action');
-      var formData = form.serialize();
-
-      $.ajax({
-        url: url,
-        type: 'POST',
-        data: formData,
-        headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        },
-        success: function(response) {
-          console.log("Request Approval success");
-          $('#requestApprovalModal').modal('hide');
-          $('#requestApprovalForm')[0].reset();
-
-          setTimeout(function() {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            $('body').css({
-              'overflow': '',
-              'padding-right': ''
-            });
-            $('#requestApprovalModal').removeClass('show').attr('aria-modal', null).css('display',
-              'none');
-          }, 500);
-
-          $('#dynamic-alert').remove();
-
-          var alertHtml = `
-          <div class="row justify-content-center" id="dynamic-alert">
-            <div class="alert alert-success alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-              ${response.message}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          </div>
-        `;
-
-          // $('#dynamic-alert').remove();
-          $('.pagetitle').after(alertHtml);
-
-          refreshStockTable();
-        },
-        error: function(xhr) {
-          // Hapus alert error sebelumnya jika ada
-          $('#dynamic-alert').remove();
-
-          // Ambil pesan error dari response
-          var message = 'Terjadi kesalahan.';
-          if (xhr.responseJSON && xhr.responseJSON.message) {
-            message = xhr.responseJSON.message;
-          } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-            message = Object.values(xhr.responseJSON.errors).flat().join('<br>');
-          }
-
-          var alertHtml = `
-            <div class="row justify-content-center" id="dynamic-alert">
-              <div class="alert alert-danger alert-dismissible fade show col-lg-12 justify-content-center" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-          `;
-          $('.pagetitle').after(alertHtml);
-
-          var errors = xhr.responseJSON && xhr.responseJSON.errors ? xhr.responseJSON.errors : null;
-          if (errors) {
-            if (errors.name) {
-              $('#name').addClass('is-invalid');
-              $('#name').next('.invalid-feedback').text(errors.name[0]);
-            }
-            if (errors.amount) {
-              $('#amount').addClass('is-invalid');
-              $('#amount').next('.invalid-feedback').text(errors.amount[0]);
-            }
-          }
-        }
-      });
-    };
-  </script> --}}
+    // function requestApprovalConfirmation() {
+    //   Swal.fire({
+    //     title: "Yakin ingin melakukan penambahan / pengurangan data stock?",
+    //     text: "Aksi ini akan diinformasikan ke admin untuk dilakukan konfirmasi!",
+    //     icon: "warning",
+    //     showCancelButton: true,
+    //     confirmButtonColor: "#2980B9",
+    //     cancelButtonColor: "#d33",
+    //     confirmButtonText: "Yes, request it!"
+    //   }).then((result) => {
+    //     if (result.isConfirmed) {
+    //       console.log("Requesting Approval Confirmed. Trying to request approval to admin...");
+    //       // document.getElementById('editStockForm').submit();
+    //       submitRequestApproval();
+    //     }
+    //   });
+    // }
+  </script>
 @endsection

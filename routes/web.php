@@ -36,9 +36,13 @@ Route::post('/registration', [RegistrationController::class, 'store']);
 Route::middleware('auth')->group(function () {
   // Route::get('/', [StockController::class, 'index'])->name('homepage');
   Route::resource('/stock', 'StockController');
+
   Route::get('/request-approval', 'RequestApprovalController@index')->name('request-approval.index');
   Route::get('/getRequestData', 'RequestApprovalController@getRequestData');
   Route::post('/requestApproval', 'RequestApprovalController@requestApproval');
+
+  //accept approval
+  Route::post('/request-approval/accept/{requestId}', 'RequestApprovalController@acceptApproval');
 });
 
 Route::get('/input', function () {
