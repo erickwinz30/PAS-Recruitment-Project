@@ -102,13 +102,15 @@ class RequestApprovalController extends Controller
       //sending email to admin
       $mailable = new RequestApproveMail($notificationData);
       foreach ($admins as $admin) {
-        SendEmail::dispatch($admin->email, $mailable)->onQueue('default');
+        // SendEmail::dispatch($admin->email, $mailable)->onQueue('default');
+        $this->dispatchEmail($admin->email, $mailable);
       }
 
       //sending telegram notification to admin
       foreach ($admins as $admin) {
         try {
-          SendTelegram::dispatch($admin->telegram_chat_id, $notificationData)->onQueue('default');
+          // SendTelegram::dispatch($admin->telegram_chat_id, $notificationData)->onQueue('default');
+          $this->dispatchTelegram($admin->telegram_chat_id, $notificationData);
         } catch (\Exception $e) {
           Log::error('Error sending Telegram notification: ' . $e->getMessage());
         }
@@ -197,5 +199,15 @@ class RequestApprovalController extends Controller
         'message' => 'Gagal menolak request approval.',
       ], 500);
     }
+  }
+
+  public function dispatchEmail($email, $mailable)
+  {
+    SendEmail::dispatch($email, $mailable)->onQueue('default');
+  }
+
+  public function dispatchTelegram($telegram_chat_id, $notificationData)
+  {
+    SendTelegram::dispatch($telegram_chat_id, $notificationData)->onQueue('default');
   }
 }
