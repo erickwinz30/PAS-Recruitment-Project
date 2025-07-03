@@ -161,4 +161,22 @@ class UserController extends Controller
   {
     //
   }
+
+  public function apiIndex()
+  {
+    $users = User::all();
+
+    return response()->json([
+      'success' => true,
+      'data' => $users,
+    ]);
+  }
+
+  public function apiEdit(User $user)
+  {
+    return response()->json([
+      'success' => true,
+      'data' => $user,
+    ]);
+  }
 }

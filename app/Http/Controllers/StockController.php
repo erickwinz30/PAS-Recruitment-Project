@@ -158,4 +158,16 @@ class StockController extends Controller
       return response()->json(['success' => false, 'message' => 'Gagal menghapus stock.'], 422);
     }
   }
+
+  public function apiIndex()
+  {
+    $stocks = Stock::where('is_deleted', false)
+      ->orderBy('created_at', 'desc')
+      ->get();
+
+    return response()->json([
+      'success' => true,
+      'data' => $stocks,
+    ]);
+  }
 }

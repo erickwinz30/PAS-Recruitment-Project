@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
           'amount' => $stock['amount'],
         ]
       );
-      Log::info($request_approval);
+      Log::info("Seeding Request Approval: " . $request_approval);
     }
   }
 }

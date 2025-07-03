@@ -210,4 +210,96 @@ class RequestApprovalController extends Controller
   {
     SendTelegram::dispatch($telegram_chat_id, $notificationData)->onQueue('default');
   }
+
+  // for api
+  public function apiIndex()
+  {
+    $requestApprovals = RequestApproval::where('status', 'pending')->with(['user', 'stock'])->get();
+    Log::info('Fetching request approvals: ', $requestApprovals->toArray());
+
+    $transformedData = $requestApprovals->map(function ($request) {
+      return [
+        'id' => $request->id,
+        'user' => $request->user->name,
+        'name' => $request->stock->name,
+        'amount' => $request->amount,
+        'status' => $request->status,
+        'is_entry' => $request->is_entry,
+        'updated_at' => $request->updated_at,
+      ];
+    });
+
+    return response()->json([
+      'success' => true,
+      'data' => $transformedData,
+    ]);
+  }
+
+  public function apiRequestApproved()
+  {
+    $requestApprovals = RequestApproval::where('status', 'approved')->with(['user', 'stock'])->get();
+    Log::info('Fetching approved request approvals: ', $requestApprovals->toArray());
+
+    $transformedData = $requestApprovals->map(function ($request) {
+      return [
+        'id' => $request->id,
+        'user' => $request->user->name,
+        'name' => $request->stock->name,
+        'amount' => $request->amount,
+        'status' => $request->status,
+        'is_entry' => $request->is_entry,
+        'updated_at' => $request->updated_at,
+      ];
+    });
+
+    return response()->json([
+      'success' => true,
+      'data' => $transformedData,
+    ]);
+  }
+
+  public function apiRequestRejected()
+  {
+    $requestApprovals = RequestApproval::where('status', 'rejected')->with(['user', 'stock'])->get();
+    Log::info('Fetching approved request approvals: ', $requestApprovals->toArray());
+
+    $transformedData = $requestApprovals->map(function ($request) {
+      return [
+        'id' => $request->id,
+        'user' => $request->user->name,
+        'name' => $request->stock->name,
+        'amount' => $request->amount,
+        'status' => $request->status,
+        'is_entry' => $request->is_entry,
+        'updated_at' => $request->updated_at,
+      ];
+    });
+
+    return response()->json([
+      'success' => true,
+      'data' => $transformedData,
+    ]);
+  }
+  public function apiRequestAll()
+  {
+    $requestApprovals = RequestApproval::with(['user', 'stock'])->get();
+    Log::info('Fetching approved request approvals: ', $requestApprovals->toArray());
+
+    $transformedData = $requestApprovals->map(function ($request) {
+      return [
+        'id' => $request->id,
+        'user' => $request->user->name,
+        'name' => $request->stock->name,
+        'amount' => $request->amount,
+        'status' => $request->status,
+        'is_entry' => $request->is_entry,
+        'updated_at' => $request->updated_at,
+      ];
+    });
+
+    return response()->json([
+      'success' => true,
+      'data' => $transformedData,
+    ]);
+  }
 }
